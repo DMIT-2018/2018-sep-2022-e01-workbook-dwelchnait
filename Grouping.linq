@@ -1,9 +1,9 @@
 <Query Kind="Expression">
   <Connection>
-    <ID>75df64b9-fa39-4b9a-990e-66f6ea8821c2</ID>
+    <ID>4e0d1e4f-2f86-46ed-b1ab-49ae54688c24</ID>
     <NamingServiceVersion>2</NamingServiceVersion>
     <Persist>true</Persist>
-    <Server>.\SQLEXPRESS</Server>
+    <Server>W309-DWELCH\MSSQLSERVER01</Server>
     <AllowDateOnlyTimeOnly>true</AllowDateOnlyTimeOnly>
     <DeferDatabasePopulation>true</DeferDatabasePopulation>
     <Database>Chinook</Database>
@@ -82,6 +82,7 @@ Albums
 Albums
 	.GroupBy(a => new {a.ReleaseLabel, a.ReleaseYear})
 	.Where(egP => egP.Count() > 2)  //filtering against each group pile
+	.ToList() // this forces collection into local memory for further processing trackcountA
 	.Select(eachgroupPile => new
 		{
 			Label = eachgroupPile.Key.ReleaseLabel,
@@ -92,10 +93,11 @@ Albums
 								{
 									title = egPInstance.Title,
 									artist = egPInstance.Artist.Name,
-									trackcount = egPInstance.Tracks
-													.Select(x => x).Count(),
+									trackcountA = egPInstance.Tracks.Count(),
+									trackcountB = egPInstance.Tracks.Select(x => x).Count(),
 									YearOfAlbum = egPInstance.ReleaseYear
 								})
+			
 		})
 
 
