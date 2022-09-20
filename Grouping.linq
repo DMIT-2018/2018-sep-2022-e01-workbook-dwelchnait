@@ -93,7 +93,7 @@ Albums
 									title = egPInstance.Title,
 									artist = egPInstance.Artist.Name,
 									trackcount = egPInstance.Tracks
-													.Select(x => x),
+													.Select(x => x).Count(),
 									YearOfAlbum = egPInstance.ReleaseYear
 								})
 		})
