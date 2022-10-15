@@ -17,10 +17,53 @@
 void Main()
 {
 	//Main is going to represent the web page post method
-	string searcharg =null;
-	string searchby = "Artist";
-	List<TrackSelection> tracklist = Track_FetchTracksBy(searcharg, searchby);
-	tracklist.Dump();
+	try
+	{
+		//coded and tested the FetchTracksBy query
+		string searcharg ="Deep";
+		string searchby = "Artist";
+		List<TrackSelection> tracklist = Track_FetchTracksBy(searcharg, searchby);
+		//tracklist.Dump();
+		
+		//coded and tested the FetchPlaylist query
+		string playlistname ="hansenb1";
+		string username = "HansenB"; //this is an user name which will come from O/S via security
+		List<PlaylistTrackInfo> playlist = PlaylistTrack_FetchPlaylist(playlistname, username);
+		//playlist.Dump();
+		
+		//coded and tested the Add_Track trx
+		//the command method will receive no collection but will receive individual arguments
+		// trackid, playlistname, username
+		//test tracks
+		//793 A castle full of Rascals
+		//822 A Twist in the Tail
+		//543 Burn
+		//756 Child in Time
+		
+		//on the web page, the post method would have already have access to the
+		//  BindProperty variables containing the input values
+		playlistname = "hansenbtest";
+		int trackid = 793;
+		
+		//call the service method to process the data
+		PlaylistTrack_AddTrack(playlistname, username, trackid);
+		
+		//once the service method is complete, the web page would refresh
+		playlist = PlaylistTrack_FetchPlaylist(playlistname, username);
+		playlist.Dump();
+	}
+	catch (ArgumentNullException ex)
+	{
+		GetInnerException(ex).Message.Dump();
+	}
+	catch (ArgumentException ex)
+	{
+		GetInnerException(ex).Message.Dump();
+	}
+	catch (Exception ex)
+	{
+		GetInnerException(ex).Message.Dump();
+	}
 }
 
 // You can define other methods, fields, classes and namespaces here
@@ -43,6 +86,17 @@ public class PlaylistTrackInfo
     public int Milliseconds {get; set;}
 }
 #endregion
+
+//general method to drill down into an exception of obtain the InnerException where your
+//  actual error is detailed
+
+private Exception GetInnerException(Exception ex)
+{
+	while (ex.InnerException != null)
+		ex = ex.InnerException;
+	return ex;
+}
+
 
 //pretend to be the class library project
 #region TrackServices class
@@ -72,8 +126,119 @@ public List<TrackSelection> Track_FetchTracksBy(string searcharg, string searchb
 										});
 	return results.ToList();
 }
+
+public List<PlaylistTrackInfo> PlaylistTrack_FetchPlaylist(string playlistname, string username)
+{
+	if (string.IsNullOrWhiteSpace(playlistname))
+	{
+		throw new ArgumentNullException("No playlist name submitted");
+	}
+	if (string.IsNullOrWhiteSpace(username))
+	{
+		throw new ArgumentNullException("No user name submitted");
+	}
+	IEnumerable<PlaylistTrackInfo> results = PlaylistTracks
+								.Where(x => x.Playlist.Name.Equals(playlistname)
+								         && x.Playlist.UserName.Equals(username))
+								.Select(x => new PlaylistTrackInfo
+										{
+											TrackId = x.TrackId,
+											TrackNumber = x.TrackNumber,
+											SongName = x.Track.Name,
+											Milliseconds = x.Track.Milliseconds
+										})
+								.OrderBy(x => x.TrackNumber);
+	return results.ToList();
+}
+
 #endregion
 
+#region Command TRX methods
+
+void PlaylistTrack_AddTrack(string playlistname, string username, int trackid)
+{
+	//locals
+	Tracks trackexists = null;
+	Playlists playlistexists = null;
+	PlaylistTracks playlisttrackexists = null;
+	int tracknumber =0;
+	
+	if (string.IsNullOrWhiteSpace(playlistname))
+	{
+		throw new ArgumentNullException("No playlist name submitted");
+	}
+	if (string.IsNullOrWhiteSpace(username))
+	{
+		throw new ArgumentNullException("No user name submitted");
+	}
+	
+	trackexists = Tracks
+					.Where(x => x.TrackId == trackid)
+					.Select(x => x)
+					.FirstOrDefault();
+	if (trackexists == null)
+	{
+		throw new ArgumentException("Selected track no longer on file. Refresh track table.");
+	}
+	
+	//B/R  playlist names must be unique within a user
+	playlistexists = Playlists
+						.Where(x => x.Name.Equals(playlistname)
+								&& x.UserName.Equals(username))
+						.Select(x => x)
+						.FirstOrDefault();
+	if (playlistexists == null)
+	{
+		playlistexists = new Playlists()
+		{
+			Name = playlistname,
+			UserName = username
+		};
+		//staging the new playlist record
+		Playlists.Add(playlistexists);
+		tracknumber = 1;
+	}
+	else
+	{
+		// B/R a track may only exist once on a playlist
+		playlisttrackexists = PlaylistTracks
+								.Where(x => x.Playlist.Name.Equals(playlistname)
+										&&  x.Playlist.UserName.Equals(username)
+										&&  x.TrackId == trackid)
+								.Select(x => x)
+								.FirstOrDefault();
+		if (playlisttrackexists == null)
+		{
+			//generate the next tracknumber
+			tracknumber = PlaylistTracks
+							.Where(x => x.Playlist.Name.Equals(playlistname)
+										&&  x.Playlist.UserName.Equals(username)
+										&&  x.TrackId == trackid)
+							.Count();
+			tracknumber++;
+		}
+		else
+		{
+			var songname = Tracks
+							.Where(x => x.TrackId == trackid)
+							.Select( x => x.Name)
+							.SingleOrDefault();
+			throw new Exception($"Selected track ({songname}) already exists on the playlist.");
+		}
+										
+	}
+	
+	//processing to stage the new track to the playlist
+	playlisttrackexists = new PlaylistTracks();
+	
+	//load the data to the new instance of playlist track
+	playlisttrackexists.TrackNumber = tracknumber;
+	playlisttrackexists.TrackId = trackid;
+	
+							
+		
+}
+#endregion
 
 
 
