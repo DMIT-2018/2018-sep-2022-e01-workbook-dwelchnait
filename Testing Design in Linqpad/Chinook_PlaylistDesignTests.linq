@@ -43,8 +43,8 @@ void Main()
 		//on the web page, the post method would have already have access to the
 		//  BindProperty variables containing the input values
 		playlistname = "hansenbtest";
-		int trackid = 793;
-		
+		int trackid = 756;
+
 		//call the service method to process the data
 		PlaylistTrack_AddTrack(playlistname, username, trackid);
 		
@@ -212,8 +212,7 @@ void PlaylistTrack_AddTrack(string playlistname, string username, int trackid)
 			//generate the next tracknumber
 			tracknumber = PlaylistTracks
 							.Where(x => x.Playlist.Name.Equals(playlistname)
-										&&  x.Playlist.UserName.Equals(username)
-										&&  x.TrackId == trackid)
+										&&  x.Playlist.UserName.Equals(username))
 							.Count();
 			tracknumber++;
 		}
@@ -235,8 +234,47 @@ void PlaylistTrack_AddTrack(string playlistname, string username, int trackid)
 	playlisttrackexists.TrackNumber = tracknumber;
 	playlisttrackexists.TrackId = trackid;
 	
-							
+	/*******************************************
+	?? what about the second part of the primary key: PlaylistId
+	   it the playlist exists then we know the id:
+	   		playlistexists.PlaylistId;
+			
+	in the situation of a NEW playlist, even though we have
+		created the playlist instance (see above) it is ONLY staged!!!
 		
+	this means that the actual sql records has NOT yet been created
+	this means that the IDENTITY value for the new playlist DOES NOT 
+		yet exists. The value on the playlist instance (playlistexists)
+		is zero.
+	thus we have a serious problem
+	
+	Solution
+	it is built into EntityFramwework software and is based on using
+		the navigational property in Playlists pointing to its "child"
+		
+	staging a typical Add in the past was to reference the entity
+		and use the entity.Add(xxxxxx)
+		_context.PlaylistTrack.Add(xxxxx)  [_context. is context instance in VS]
+	IF you use this statement, the playlistid would be zero (0)
+		causing your transaction to ABORT
+		
+	INSTEAD. do the staging using the syntax of "parent.navigationalproperty.Add(xxxxx)
+	playlistexists will be filled with either
+		scenario A) a new staged instance
+		scenario B) a copy of the existing playlist instance
+	*******************************************/
+	playlistexists.PlaylistTracks.Add(playlisttrackexists);
+	
+	/**************************************************
+	Staging is complete
+	Commit the work (transaction)
+	commiting the work needs a .SaveChanges()
+	a transaction has ONLY ONE .SaveChanges()
+	IF the SaveChanges() fails then all staged work being handled by the SaveChanges
+		is rollback.
+	
+	*************************************************/
+	SaveChanges();
 }
 #endregion
 
