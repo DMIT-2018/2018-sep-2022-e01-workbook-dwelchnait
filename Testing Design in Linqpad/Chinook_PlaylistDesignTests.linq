@@ -1,12 +1,12 @@
 <Query Kind="Program">
   <Connection>
-    <ID>5cd86f66-469b-4208-8b6f-a9f6ebe611e6</ID>
+    <ID>a63a2725-90fa-4466-9c8e-9303687100ea</ID>
     <NamingServiceVersion>2</NamingServiceVersion>
     <Persist>true</Persist>
     <Driver Assembly="(internal)" PublicKeyToken="no-strong-name">LINQPad.Drivers.EFCore.DynamicDriver</Driver>
-    <Server>.\SQLEXPRESS</Server>
+    <Server>.\MSSQLSERVER01</Server>
+    <DisplayName>Chinook-office</DisplayName>
     <Database>Chinook</Database>
-    <DisplayName>Chinook-Entity</DisplayName>
     <DriverData>
       <PreserveNumeric1>True</PreserveNumeric1>
       <EFProvider>Microsoft.EntityFrameworkCore.SqlServer</EFProvider>
@@ -418,7 +418,7 @@ public void PlaylistTrack_RemoveTracks(string playlistname, string username,
 	}
 	if (errorlist.Count > 0)
 	{
-		throw new AggregateException("Unable to remove request tracks. Chcek concerns", errorlist);
+		throw new AggregateException("Unable to remove request tracks. Check concerns", errorlist);
 	}
 	else
 	{
