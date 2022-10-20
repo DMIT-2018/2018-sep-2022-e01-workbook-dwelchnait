@@ -86,7 +86,17 @@ void Main()
 	}
 	catch (ArgumentException ex)
 	{
+		
 		GetInnerException(ex).Message.Dump();
+	}
+	catch(AggregateException ex)
+	{
+		//having collected a number of errors
+		//	each error should be dumped to a separate line
+		foreach(var error in ex.InnerExceptions)
+		{
+			error.Message.Dump();
+		}
 	}
 	catch (Exception ex)
 	{
@@ -320,6 +330,9 @@ public void PlaylistTrack_RemoveTracks(string playlistname, string username,
 	PlaylistTracks playlisttrackexists = null;
 	int tracknumber = 0;
 	
+	//we need a container to hold x number of Exception messages
+	List<Exception> errorlist = new List<Exception>();
+	
 	if (string.IsNullOrWhiteSpace(playlistname))
 	{
 		throw new ArgumentNullException("No playlist name submitted");
@@ -342,7 +355,7 @@ public void PlaylistTrack_RemoveTracks(string playlistname, string username,
 						.FirstOrDefault();
 	if (playlistexists == null)
 	{
-		throw new ArgumentException($"Play list {playlistname} does not exist for this user.");
+		errorlist.Add(new Exception($"Play list {playlistname} does not exist for this user."));
 	}
 	else
 	{
@@ -397,10 +410,18 @@ public void PlaylistTrack_RemoveTracks(string playlistname, string username,
 							.Where(x => x.TrackId == item.TrackId)
 							.Select( x => x.Name)
 							.SingleOrDefault();
-				throw new Exception($"The track ({songname}) is no longer on file. Please Remove");
+				errorlist.Add(new Exception($"The track ({songname}) is no longer on file. Please Remove"));
 			}
 		}
 		
+		
+	}
+	if (errorlist.Count > 0)
+	{
+		throw new AggregateException("Unable to remove request tracks. Chcek concerns", errorlist);
+	}
+	else
+	{
 		//all work has been staged
 		SaveChanges();
 	}
