@@ -43,10 +43,10 @@ void Main()
 		//on the web page, the post method would have already have access to the
 		//  BindProperty variables containing the input values
 		//playlistname = "hansenbtest";
-		// trackid = 756;
+		//int trackid = 756;
 
 		//call the service method to process the data
-		//PlaylistTrack_AddTrack(playlistname, username, trackid); tested
+		//PlaylistTrack_AddTrack(playlistname, username, trackid); //tested
 		
 		//on the web page, the post method would have already have access to the
 		//	BindProperty variables containing the input values
@@ -58,14 +58,19 @@ void Main()
 			 TrackNumber= 1,
 			 TrackInput = 0});
 		tracklistinfo.Add(new PlaylistTrackTRX()
-			{SelectedTrack = true,
+			{SelectedTrack = false,
 			 TrackId =543,
-			 TrackNumber= 1,
+			 TrackNumber= 3,
 			 TrackInput = 0});
 		tracklistinfo.Add(new PlaylistTrackTRX()
 			{SelectedTrack = true,
 			 TrackId =822,
-			 TrackNumber= 1,
+			 TrackNumber= 2,
+			 TrackInput = 0});
+		tracklistinfo.Add(new PlaylistTrackTRX()
+			{SelectedTrack = false,
+			 TrackId =756,
+			 TrackNumber= 4,
 			 TrackInput = 0});
 		
 		//call the service method to process the data
@@ -312,6 +317,8 @@ public void PlaylistTrack_RemoveTracks(string playlistname, string username,
 {
 	//local variables
 	Playlists playlistexists = null;
+	PlaylistTracks playlisttrackexists = null;
+	int tracknumber = 0;
 	
 	if (string.IsNullOrWhiteSpace(playlistname))
 	{
@@ -339,7 +346,63 @@ public void PlaylistTrack_RemoveTracks(string playlistname, string username,
 	}
 	else
 	{
+		//obtain the tracks to keep
+		//the SelectedTrack is a boolean field
+		//	false: keep
+		//	true : remove
+		//create a query to extract the "keep" tracks from the incoming data
+		IEnumerable<PlaylistTrackTRX> keeplist = tracklistinfo
+												.Where(x => !x.SelectedTrack)
+												.OrderBy(x => x.TrackNumber);
+		//obtain the tracks to remove
+		IEnumerable<PlaylistTrackTRX> removelist = tracklistinfo
+												.Where(x => x.SelectedTrack);
 		
+		foreach(PlaylistTrackTRX item in removelist)
+		{
+			playlisttrackexists = PlaylistTracks
+								.Where(x => x.Playlist.Name.Equals(playlistname)
+										&& x.Playlist.UserName.Equals(username)
+										&& x.TrackId == item.TrackId)
+								.FirstOrDefault();
+			if (playlisttrackexists != null)
+			{
+				PlaylistTracks.Remove(playlisttrackexists);
+			}
+		}
+		
+		tracknumber= 1;
+		foreach(PlaylistTrackTRX item in keeplist)
+		{
+			playlisttrackexists = PlaylistTracks
+								.Where(x => x.Playlist.Name.Equals(playlistname)
+										&& x.Playlist.UserName.Equals(username)
+										&& x.TrackId == item.TrackId)
+								.FirstOrDefault();
+			if (playlisttrackexists != null)
+			{
+				playlisttrackexists.TrackNumber = tracknumber;
+				PlaylistTracks.Update(playlisttrackexists);
+				
+				//this library is not directly accessable by linqpad
+				//EntityEntry<PlaylistTracks> updating = _context.Entry(playlisttrackexists);
+				//updating.State = Microsoft.EntityFrameworkCore.EntityState.Modify;
+				
+				//get ready for next track
+				tracknumber++;
+			}
+			else
+			{
+				var songname = Tracks
+							.Where(x => x.TrackId == item.TrackId)
+							.Select( x => x.Name)
+							.SingleOrDefault();
+				throw new Exception($"The track ({songname}) is no longer on file. Please Remove");
+			}
+		}
+		
+		//all work has been staged
+		SaveChanges();
 	}
 }
 				
