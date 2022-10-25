@@ -1,12 +1,12 @@
 <Query Kind="Program">
   <Connection>
-    <ID>a63a2725-90fa-4466-9c8e-9303687100ea</ID>
+    <ID>5cd86f66-469b-4208-8b6f-a9f6ebe611e6</ID>
     <NamingServiceVersion>2</NamingServiceVersion>
     <Persist>true</Persist>
     <Driver Assembly="(internal)" PublicKeyToken="no-strong-name">LINQPad.Drivers.EFCore.DynamicDriver</Driver>
-    <Server>.\MSSQLSERVER01</Server>
-    <DisplayName>Chinook-office</DisplayName>
+    <Server>.\SQLEXPRESS</Server>
     <Database>Chinook</Database>
+    <DisplayName>Chinook-Entity</DisplayName>
     <DriverData>
       <PreserveNumeric1>True</PreserveNumeric1>
       <EFProvider>Microsoft.EntityFrameworkCore.SqlServer</EFProvider>
@@ -43,7 +43,7 @@ void Main()
 		//on the web page, the post method would have already have access to the
 		//  BindProperty variables containing the input values
 		//playlistname = "hansenbtest";
-		//int trackid = 756;
+		//int trackid = 793;
 
 		//call the service method to process the data
 		//PlaylistTrack_AddTrack(playlistname, username, trackid); //tested
@@ -53,28 +53,31 @@ void Main()
 		playlistname = "hansenbtest";
 		List<PlaylistTrackTRX> tracklistinfo = new List<PlaylistTrackTRX>();
 		tracklistinfo.Add(new PlaylistTrackTRX()
-			{SelectedTrack = true,
-			 TrackId =793,
-			 TrackNumber= 1,
-			 TrackInput = 0});
-		tracklistinfo.Add(new PlaylistTrackTRX()
 			{SelectedTrack = false,
 			 TrackId =543,
-			 TrackNumber= 3,
-			 TrackInput = 0});
-		tracklistinfo.Add(new PlaylistTrackTRX()
-			{SelectedTrack = true,
-			 TrackId =822,
-			 TrackNumber= 2,
-			 TrackInput = 0});
+			 TrackNumber= 1,
+			 TrackInput = 6});
 		tracklistinfo.Add(new PlaylistTrackTRX()
 			{SelectedTrack = false,
 			 TrackId =756,
+			 TrackNumber= 2,
+			 TrackInput = 99});
+		tracklistinfo.Add(new PlaylistTrackTRX()
+			{SelectedTrack = true,
+			 TrackId =822,
+			 TrackNumber= 3,
+			 TrackInput = 8});
+		tracklistinfo.Add(new PlaylistTrackTRX()
+			{SelectedTrack = true,
+			 TrackId =793,
 			 TrackNumber= 4,
-			 TrackInput = 0});
+			 TrackInput = 2});
 		
 		//call the service method to process the data
-		PlaylistTrack_RemoveTracks(playlistname, username, tracklistinfo); 
+		//PlaylistTrack_RemoveTracks(playlistname, username, tracklistinfo); 
+		
+		//call the service method to process the data
+		PlaylistTrack_MoveTracks(playlistname, username, tracklistinfo);
 		
 		//once the service method is complete, the web page would refresh
 		playlist = PlaylistTrack_FetchPlaylist(playlistname, username);
@@ -426,7 +429,142 @@ public void PlaylistTrack_RemoveTracks(string playlistname, string username,
 		SaveChanges();
 	}
 }
+	
+public void PlaylistTrack_MoveTracks(string playlistname, string username, 
+				List<PlaylistTrackTRX> tracklistinfo)
+{
+	//local variables
+	Playlists playlistexists = null;
+	PlaylistTracks playlisttrackexists = null;
+	int tracknumber = 0;
+	
+	//we need a container to hold x number of Exception messages
+	List<Exception> errorlist = new List<Exception>();
+	
+	if (string.IsNullOrWhiteSpace(playlistname))
+	{
+		throw new ArgumentNullException("No playlist name submitted");
+	}
+	if (string.IsNullOrWhiteSpace(username))
+	{
+		throw new ArgumentNullException("No user name submitted");
+	}
+	
+	var count = tracklistinfo.Count();
+	if (count == 0)
+	{
+		throw new ArgumentNullException("No list of tracks were submitted");
+	}
+	
+	playlistexists = Playlists
+						.Where(x => x.Name.Equals(playlistname)
+								&& x.UserName.Equals(username))
+						.Select(x => x)
+						.FirstOrDefault();
+	if (playlistexists == null)
+	{
+		errorlist.Add(new Exception($"Play list {playlistname} does not exist for this user."));
+	}
+	else
+	{
+			
+		//validation loop to check that the data is indeed a postive number
+		//use int.TryParse to check that the value to be tested is a number
+		//check the result of tryparse against the value 1
+		int tempnum = 0;
+		foreach (var track in tracklistinfo)
+		{
+			var songname = Tracks
+							.Where(x => x.TrackId == track.TrackId)
+							.Select( x => x.Name)
+							.SingleOrDefault();
+			if(int.TryParse(track.TrackInput.ToString(), out tempnum))
+			{
+				if (tempnum < 1)
+				{
+					errorlist.Add(new Exception($"The track ({songname}) re-sequence value needs to be greater than 0. Example: 3"));
+
+				}
 				
+			}
+			else
+			{
+				errorlist.Add(new Exception($"The track ({songname}) re-sequence value needs to be a number. Example: 3"));
+			}
+		}
+		
+		//sort the command model data list on the re-org value
+		//	in ascending order  comparing x to y
+		//   a descending order comparing y to x
+		tracklistinfo.Sort((x,y) => x.TrackInput.CompareTo(y.TrackInput));
+		
+		//b) unique new track numbers
+		// the collection has been sorted in ascending order therefore the next
+		//		number must be equal to or greater than the previous number
+		// one could check to see if the next number is +1 of the previou number
+		//		BUT the re-org loop which does the actual re-sequence of numbers
+		//		will have that situation.
+		//		Therefore "holes" in this loop does not matter (logically)
+		for(int i = 0; i < tracklistinfo.Count - 1; i++)
+		{
+			var songname1 = Tracks
+							.Where(x => x.TrackId == tracklistinfo[i].TrackId)
+							.Select( x => x.Name)
+							.SingleOrDefault();
+			var songname2 = Tracks
+							.Where(x => x.TrackId == tracklistinfo[i + 1].TrackId)
+							.Select( x => x.Name)
+							.SingleOrDefault();
+			if (tracklistinfo[i].TrackInput == tracklistinfo[i+1].TrackInput)
+			{
+				errorlist.Add(new Exception($"{songname1} and {songname2} have the same re-sequence value. Re-sequence numbers must be unique"));
+			}
+		}
+		
+		
+		tracknumber= 1;
+		foreach(PlaylistTrackTRX item in tracklistinfo)
+		{
+			playlisttrackexists = PlaylistTracks
+								.Where(x => x.Playlist.Name.Equals(playlistname)
+										&& x.Playlist.UserName.Equals(username)
+										&& x.TrackId == item.TrackId)
+								.FirstOrDefault();
+			if (playlisttrackexists != null)
+			{
+				playlisttrackexists.TrackNumber = tracknumber;
+				PlaylistTracks.Update(playlisttrackexists);
+				
+				//this library is not directly accessable by linqpad
+				//EntityEntry<PlaylistTracks> updating = _context.Entry(playlisttrackexists);
+				//updating.State = Microsoft.EntityFrameworkCore.EntityState.Modify;
+				
+				//get ready for next track
+				tracknumber++;
+			}
+			else
+			{
+				var songname = Tracks
+							.Where(x => x.TrackId == item.TrackId)
+							.Select( x => x.Name)
+							.SingleOrDefault();
+				errorlist.Add(new Exception($"The track ({songname}) is no longer on file. Please Remove"));
+			}
+		}
+		
+		
+	}
+	if (errorlist.Count > 0)
+	{
+		throw new AggregateException("Unable to re-sequence tracks. Check concerns", errorlist);
+	}
+	else
+	{
+		//all work has been staged
+		SaveChanges();
+	}
+}
+
 #endregion
 
 
