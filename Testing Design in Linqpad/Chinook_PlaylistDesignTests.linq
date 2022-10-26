@@ -16,7 +16,7 @@
 
 void Main()
 {
-	//Main is going to represent the web page post method
+	//Main is going to represent the web page 
 	try
 	{
 		//Driver
@@ -57,32 +57,7 @@ void Main()
 
 // You can define other methods, fields, classes and namespaces here
 
-#region CQRS Queries/Command models
-public class TrackSelection
-{
-    public int TrackId {get; set;}
-    public string SongName {get; set;}
-    public string AlbumTitle{get; set;}
-    public string ArtistName{get; set;}
-    public int Milliseconds {get; set;}
-    public decimal Price {get; set;}
-}
-public class PlaylistTrackInfo 
-{
-    public int TrackId {get; set;}
-    public int TrackNumber {get; set;}
-    public string SongName {get; set;}
-    public int Milliseconds {get; set;}
-}
-public class PlaylistTrackTRX
-{
-    public bool SelectedTrack {get; set;}
-    public int TrackId {get; set;}
-    public int TrackNumber {get; set;}
-    public int TrackInput {get; set;}
-}
-#endregion
-
+//pretend to be the web application OnPost methods project
 #region Driver Methods
 //Driver Methods
 //general method to drill down into an exception of obtain the InnerException where your
@@ -229,6 +204,32 @@ void Test_MoveTrackTRX()
 #endregion
 
 //pretend to be the class library project
+#region CQRS Queries/Command models
+public class TrackSelection
+{
+	public int TrackId { get; set; }
+	public string SongName { get; set; }
+	public string AlbumTitle { get; set; }
+	public string ArtistName { get; set; }
+	public int Milliseconds { get; set; }
+	public decimal Price { get; set; }
+}
+public class PlaylistTrackInfo
+{
+	public int TrackId { get; set; }
+	public int TrackNumber { get; set; }
+	public string SongName { get; set; }
+	public int Milliseconds { get; set; }
+}
+public class PlaylistTrackTRX
+{
+	public bool SelectedTrack { get; set; }
+	public int TrackId { get; set; }
+	public int TrackNumber { get; set; }
+	public int TrackInput { get; set; }
+}
+#endregion
+
 #region TrackServices class
 public List<TrackSelection> Track_FetchTracksBy(string searcharg, string searchby)
 {
