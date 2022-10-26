@@ -1,12 +1,12 @@
 <Query Kind="Program">
   <Connection>
-    <ID>5cd86f66-469b-4208-8b6f-a9f6ebe611e6</ID>
+    <ID>a63a2725-90fa-4466-9c8e-9303687100ea</ID>
     <NamingServiceVersion>2</NamingServiceVersion>
     <Persist>true</Persist>
     <Driver Assembly="(internal)" PublicKeyToken="no-strong-name">LINQPad.Drivers.EFCore.DynamicDriver</Driver>
-    <Server>.\SQLEXPRESS</Server>
+    <Server>.\MSSQLSERVER01</Server>
+    <DisplayName>Chinook-office</DisplayName>
     <Database>Chinook</Database>
-    <DisplayName>Chinook-Entity</DisplayName>
     <DriverData>
       <PreserveNumeric1>True</PreserveNumeric1>
       <EFProvider>Microsoft.EntityFrameworkCore.SqlServer</EFProvider>
@@ -19,69 +19,17 @@ void Main()
 	//Main is going to represent the web page post method
 	try
 	{
-		//coded and tested the FetchTracksBy query
-		string searcharg ="Deep";
-		string searchby = "Artist";
-		List<TrackSelection> tracklist = Track_FetchTracksBy(searcharg, searchby);
-		//tracklist.Dump();
+		//Driver
+		//Test_TrackListQuery();
 		
-		//coded and tested the FetchPlaylist query
-		string playlistname ="hansenb1";
-		string username = "HansenB"; //this is an user name which will come from O/S via security
-		List<PlaylistTrackInfo> playlist = PlaylistTrack_FetchPlaylist(playlistname, username);
-		//playlist.Dump();
+		//Test_PlaylistQuery();
 		
-		//coded and tested the Add_Track trx
-		//the command method will receive no collection but will receive individual arguments
-		// trackid, playlistname, username
-		//test tracks
-		//793 A castle full of Rascals
-		//822 A Twist in the Tail
-		//543 Burn
-		//756 Child in Time
+		//Test_AddTrackTRX();
 		
-		//on the web page, the post method would have already have access to the
-		//  BindProperty variables containing the input values
-		//playlistname = "hansenbtest";
-		//int trackid = 793;
-
-		//call the service method to process the data
-		//PlaylistTrack_AddTrack(playlistname, username, trackid); //tested
+		//Test_RemoveTrackTRX();
 		
-		//on the web page, the post method would have already have access to the
-		//	BindProperty variables containing the input values
-		playlistname = "hansenbtest";
-		List<PlaylistTrackTRX> tracklistinfo = new List<PlaylistTrackTRX>();
-		tracklistinfo.Add(new PlaylistTrackTRX()
-			{SelectedTrack = false,
-			 TrackId =543,
-			 TrackNumber= 1,
-			 TrackInput = 6});
-		tracklistinfo.Add(new PlaylistTrackTRX()
-			{SelectedTrack = false,
-			 TrackId =756,
-			 TrackNumber= 2,
-			 TrackInput = 99});
-		tracklistinfo.Add(new PlaylistTrackTRX()
-			{SelectedTrack = true,
-			 TrackId =822,
-			 TrackNumber= 3,
-			 TrackInput = 8});
-		tracklistinfo.Add(new PlaylistTrackTRX()
-			{SelectedTrack = true,
-			 TrackId =793,
-			 TrackNumber= 4,
-			 TrackInput = 2});
-		
-		//call the service method to process the data
-		//PlaylistTrack_RemoveTracks(playlistname, username, tracklistinfo); 
-		
-		//call the service method to process the data
-		PlaylistTrack_MoveTracks(playlistname, username, tracklistinfo);
-		
-		//once the service method is complete, the web page would refresh
-		playlist = PlaylistTrack_FetchPlaylist(playlistname, username);
-		playlist.Dump();
+		//Test_MoveTrackTRX();
+				
 	}
 	catch (ArgumentNullException ex)
 	{
@@ -135,6 +83,8 @@ public class PlaylistTrackTRX
 }
 #endregion
 
+#region Driver Methods
+//Driver Methods
 //general method to drill down into an exception of obtain the InnerException where your
 //  actual error is detailed
 
@@ -145,6 +95,138 @@ private Exception GetInnerException(Exception ex)
 	return ex;
 }
 
+
+void Test_TrackListQuery()
+{
+	//coded and tested the FetchTracksBy query
+	string searcharg ="Deep";
+	string searchby = "Artist";
+	List<TrackSelection> tracklist = Track_FetchTracksBy(searcharg, searchby);
+	tracklist.Dump();
+	
+}
+
+void Test_PlaylistQuery()
+{
+	//coded and tested the FetchPlaylist query
+	string playlistname ="hansenb1";
+	string username = "HansenB"; //this is an user name which will come from O/S via security
+	List<PlaylistTrackInfo> playlist = PlaylistTrack_FetchPlaylist(playlistname, username);
+	playlist.Dump();
+}
+
+void Test_AddTrackTRX()
+{
+	//coded and tested the Add_Track trx
+	//the command method will receive no collection but will receive individual arguments
+	// trackid, playlistname, username
+	//test tracks
+	//543 Burn
+	//756 Child in Time
+	//822 A Twist in the Tail
+	//793 A castle full of Rascals
+
+	//on the web page, the post method would have already have access to the
+	//  BindProperty variables containing the input values
+	string playlistname = "hansenbtest";
+	string username = "HansenB";
+	int trackid = 793;
+
+	//call the service method to process the data
+	PlaylistTrack_AddTrack(playlistname, username, trackid); 
+
+	//once the service method is complete, the web page would refresh
+	var playlist = PlaylistTrack_FetchPlaylist(playlistname, username);
+	playlist.Dump();
+}
+
+void Test_RemoveTrackTRX()
+{
+	//on the web page, the post method would have already have access to the
+	//	BindProperty variables containing the input values
+	string playlistname = "hansenbtest";
+	string username = "HansenB";
+	List<PlaylistTrackTRX> tracklistinfo = new List<PlaylistTrackTRX>();
+	tracklistinfo.Add(new PlaylistTrackTRX()
+	{
+		SelectedTrack = false,
+		TrackId = 543,
+		TrackNumber = 1,
+		TrackInput = 0
+	});
+	tracklistinfo.Add(new PlaylistTrackTRX()
+	{
+		SelectedTrack = true,
+		TrackId = 756,
+		TrackNumber = 2,
+		TrackInput = 0
+	});
+	tracklistinfo.Add(new PlaylistTrackTRX()
+	{
+		SelectedTrack = true,
+		TrackId = 822,
+		TrackNumber = 3,
+		TrackInput = 0
+	});
+	tracklistinfo.Add(new PlaylistTrackTRX()
+	{
+		SelectedTrack = false,
+		TrackId = 793,
+		TrackNumber = 4,
+		TrackInput = 0
+	});
+
+	//call the service method to process the data
+	PlaylistTrack_RemoveTracks(playlistname, username, tracklistinfo);
+	//once the service method is complete, the web page would refresh
+	var playlist = PlaylistTrack_FetchPlaylist(playlistname, username);
+	playlist.Dump();
+}
+
+void Test_MoveTrackTRX()
+{
+	//on the web page, the post method would have already have access to the
+	//	BindProperty variables containing the input values
+	string playlistname = "hansenbtest";
+	string username = "HansenB";
+	List<PlaylistTrackTRX> tracklistinfo = new List<PlaylistTrackTRX>();
+	tracklistinfo.Add(new PlaylistTrackTRX()
+	{
+		SelectedTrack = false,
+		TrackId = 543,
+		TrackNumber = 1,
+		TrackInput = 6
+	});
+	tracklistinfo.Add(new PlaylistTrackTRX()
+	{
+		SelectedTrack = false,
+		TrackId = 756,
+		TrackNumber = 2,
+		TrackInput = 99
+	});
+	tracklistinfo.Add(new PlaylistTrackTRX()
+	{
+		SelectedTrack = false,
+		TrackId = 822,
+		TrackNumber = 3,
+		TrackInput = 8
+	});
+	tracklistinfo.Add(new PlaylistTrackTRX()
+	{
+		SelectedTrack = false,
+		TrackId = 793,
+		TrackNumber = 4,
+		TrackInput = 2
+	});
+
+	//call the service method to process the data
+	PlaylistTrack_MoveTracks(playlistname, username, tracklistinfo);
+	//once the service method is complete, the web page would refresh
+	var playlist = PlaylistTrack_FetchPlaylist(playlistname, username);
+	playlist.Dump();
+}
+
+#endregion
 
 //pretend to be the class library project
 #region TrackServices class
