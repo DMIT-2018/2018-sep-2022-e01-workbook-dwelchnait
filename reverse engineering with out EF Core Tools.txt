@@ -1,0 +1,14 @@
+open solution
+add reference to webapp for class library
+open Tools/NuGet Package Manager/ Packmanager Console
+set default project to class library
+run: Install-Package Microsoft.EntityFrameworkCore.Tools
+
+run: Scaffold-DbContext 'Data Source=.\SQLEXPRESS;Initial Catalog=Chinook;Integrated Security=true' Microsoft.EntityFrameworkCore.SqlServer -o Entities
+
+manager nuget packages
+add Microsoft.EntityFrameworkCore.SqlServer(6.0.10)
+go to WebApp
+update packages (Dependencies/packages/updates....
+
+do a build
