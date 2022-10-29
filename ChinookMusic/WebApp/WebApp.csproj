@@ -22,4 +22,8 @@
     <ProjectReference Include="..\ChinookSystem\ChinookSystem.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\lib\" />
+  </ItemGroup>
+
 </Project>
