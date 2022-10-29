@@ -6,9 +6,15 @@ run: Install-Package Microsoft.EntityFrameworkCore.Tools
 
 run: Scaffold-DbContext 'Data Source=.\SQLEXPRESS;Initial Catalog=Chinook;Integrated Security=true' Microsoft.EntityFrameworkCore.SqlServer -o Entities
 
+notice that the context class is in the Entities folder.
+move the context class to your DAL folder
+Change the Namespace from .Entities to .DAL
+Add a using statment pointing to your Entities namespace (using ChinookSystem.Entities)
+
+
 manager nuget packages
 add Microsoft.EntityFrameworkCore.SqlServer(6.0.10)
 go to WebApp
-update packages (Dependencies/packages/updates....
+update packages (Dependencies/packages/updates....) all packages
 
 do a build
