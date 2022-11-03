@@ -16,7 +16,30 @@
         <nav>
             <ul>
                 <li>
+                    <a asp-area="" asp-page="/Index">
+                    <img src="~/img/ChinookMusicMenuLogo.jpg"
+                        alt="Menu Logo image"
+                        title="Go to Home" >
+                    </a>
+                </li>
+                <li>
                     <a asp-area="" asp-page="/Index">Home</a>
+                </li>
+                @*
+                    setup a submenu (drop down menu) using holiday.css
+                      see holidaycss.js.org
+
+                    start with an li tag
+                    within : add a span tag: entry on the menu root
+                             add ul tag: starts the drop down menu
+                             within : add any number of li  menu
+                                       items
+                *@
+                <li>
+                    <span>Samples</span>
+                    <ul>
+                        <li><a asp-area="" asp-page="/SamplePages/Index">Default Sample Pages Home</a></li>
+                    </ul>
                 </li>
                 <li>
                     <a asp-area="" asp-page="/Privacy">Privacy</a>
