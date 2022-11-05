@@ -1,0 +1,128 @@
+﻿@page
+@model WebApp.Pages.SamplePages.ControlsModel
+@{
+    ViewData["Title"] = "Various Form Controls";
+}
+
+@section CustomCSS{
+    @*
+        The file _MyCustomCSS contains valid code that represents css
+        The partial tag will bring in the contents of the file
+        The section referrence of CustomCSS will place the file contents
+            on the layout page in the "named" RenderSection
+    *@
+    <partial name="_MyCustomCSS" />
+}
+
+<h1>Various Form Controls</h1>
+
+@if(!string.IsNullOrWhiteSpace(Model.Feedback))
+{
+    <p>@Model.Feedback</p>
+}
+
+<section class="setflex">
+    <div class="onethird">
+        <h3>TextBoxes</h3>
+        <form method="post">
+            <label>
+                Enter an Email
+                <input type="email" asp-for="EmailText"
+                    placeholder="enter email"/>
+            </label>
+            </br/>
+            <label>
+                Enter a Password
+                <input type="password" asp-for="PasswordText"
+                    placeholder="enter password"/>
+            </label>
+            </br/>
+             <label>
+                Enter a Date
+                <input type="date" asp-for="DateText"/>
+            </label>
+            </br/>
+             <label>
+                Enter a Time
+                <input type="time" asp-for="TimeText"/>
+            </label>
+            </br/>
+            <button type="submit" value="textbox" id="theTextButton"
+                name="theTextButton" asp-page-handler="TextBox">
+            Text Submit</button>
+        </form>
+    </div>
+    <div class="onethird">
+        <h3>Radiobuttons CheckBox TextArea</h3>
+        <form method="post">
+            <label>
+                Select favourite meal<br/>
+            </label>
+            @*<input type="radio" value="breakfast" asp-for="Meal" />
+                &nbsp;Breakfast<br/>
+            <input type="radio" value="lunch" asp-for="Meal" />
+                &nbsp;Lunch<br/>
+            <input type="radio" value="dinner" asp-for="Meal" />
+                &nbsp;Dinner<br/>
+            <input type="radio" value="snacks" asp-for="Meal" />
+                &nbsp;Snacks<br/>*@
+            @foreach(var item in Model.Meals)
+            {
+                <input type="radio" value="@item" asp-for="Meal" /> @item<br/>
+            }
+            <label>
+                <input type="checkbox" value=true asp-for="AcceptanceBox" />
+                 &nbsp; I agree to terms
+            </label>
+            <br/>
+            <label>
+                Message
+                <textarea rows="5" cols="60" placeholder="enter message"
+                    asp-for="MessageBody"></textarea>
+            </label>
+            <br/>
+            <button type="submit" value="radiocheckarea" id="theRadioCheckAreaButton"
+                name="theRadioCheckAreaButton" asp-page-handler="RadioCheckArea">
+            Radio/Check/Area Submit</button>
+        </form>
+    </div>
+    <div class="onethird">
+        <h3>List and Slider</h3>
+        <form method="post">
+            <label>
+                Select your favourite Ride
+                <select asp-for="MyRide">
+                    <option value="0">select ride ...</option>
+                    @foreach(var ride in Model.Rides)
+                    {
+                        <option value="@ride.ValueId">@ride.DisplayText</option>
+                    }
+                </select>
+            </label>
+            <br/>
+            <label>
+                Select your favourite Vacation Spot
+                <input type="text" asp-for="VacationSpot"
+                    list="VacationChoices" />
+                <datalist id="VacationChoices">
+                    @foreach(var spot in Model.VacationSpots)
+                    {
+                        <option value="@spot"/>
+                        //<option value="@spot">@spot</option>
+                    }
+                </datalist>
+            </label>
+            <br/>
+            <label>
+                Rate the form control review (bad < - > good)
+                <input type="range" min="0" max="10" steps="1" value="5"
+                    asp-for="ReviewRating" checked="@Model.ReviewRating"/>
+            </label>
+            <br/>
+            <button type="submit" value="listslider" id="theListSliderButton"
+                name="theListSliderButton" asp-page-handler="ListSlider">
+            Lists/Slider Submit</button>
+        </form>
+    </div>
+
+</section>

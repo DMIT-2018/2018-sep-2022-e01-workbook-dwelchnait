@@ -1,6 +1,11 @@
+
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using WebApp.Data;
+
+#region Additional Namespaces
+using ChinookSystem;
+#endregion
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,7 +17,8 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 //add another GetConnectionString to reference our database
 //  connectionString
-var connectionStringChinook = builder.Configuration.GetConnectionString("ChinookDB");
+var connectionStringChinook = 
+    builder.Configuration.GetConnectionString("ChinookDB");
 
 //given for the db connection to Defaultconnection string
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -26,8 +32,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 //the extension method will extend the IServiceCollection Class
 //the extension method requires a parameter options.UseSqlServer(XXX)
 //  where xxx is the connection string variable
-//builder.Services.ChinookSystemBackendDependencies(options =>
-//            options.UseSqlServer(connectionStringChinook));
+builder.Services.ChinookSystemBackendDependencies(options =>
+            options.UseSqlServer(connectionStringChinook));
 
 
 
