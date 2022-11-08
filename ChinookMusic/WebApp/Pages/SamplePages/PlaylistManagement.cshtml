@@ -1,0 +1,181 @@
+﻿@page "{searchBy?}/{searchArg?}/{playlistname?}"
+@model WebApp.Pages.SamplePages.PlaylistManagementModel
+@{
+    ViewData["Title"] = "Playlist Management";
+}
+
+@section CustomCSS{
+    <partial name=_MyCustomCSS />
+}
+<h1>Playlist Management</h1>
+<blockquote>
+    This page has  been created to demonstrate an UI interface for bulk maintenance
+    of data on the database, commonly referred to as <b>transactional processing</b>.
+    The page will allow the user to create or alter a list of tracks (Add, reorgnaize,
+    and remove) of a playlist.
+    <br/><br/>
+    Several UI techniques will be employeed on this page. This is not the only way
+    the interface could have been done. Special note should be directed to the 
+    display and collection of data from the Playlist table. This table will demonstrate
+    an implementation of using CQRS data models. The error list display demonstrates the
+    display of having multiple errors returned from a business service.
+
+</blockquote>
+
+@if (Model.HasFeedBack)
+{
+    <blockquote class="success">@Model.FeedBackMessage</blockquote>
+}
+
+@if (Model.HasError)
+{
+    <blockquote class="error">
+        @Model.ErrorMessage
+        <ul>
+            @foreach (var detail in Model.ErrorDetails)
+            {
+                <li>@detail</li>
+            }
+        </ul>
+    </blockquote>
+}
+<section class="setflex">
+    <div class="onehalf">
+        <form method="post">
+        <label>
+            Search pattern
+            <input type="text" asp-for="searchArg" />
+            <br/>
+            <input type="radio" asp-for="searchBy" value="Artist"/>&nbsp;&nbsp;Artist
+            &nbsp;&nbsp;
+            <input type="radio" asp-for="searchBy" value="Album"/>&nbsp;&nbsp;Album
+            &nbsp; &nbsp;
+            <button type="submit" asp-page-handler="TrackSearch"
+               title="Fetch tracks">Tracks ?</button>
+        </label>
+        </form>
+        @if(!string.IsNullOrWhiteSpace(Model.searchArg)
+             && !string.IsNullOrWhiteSpace(Model.searchBy))
+        {
+          if(Model.trackInfo.Count() == 0)
+            {
+                <p style="color:blue;font-weight:bold; font-size:large">
+                    No tracks matching search request.
+                </p>
+            }
+            else
+            {
+                <table>
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Song</th>
+                            <th>Album</th>
+                            <th>Artist</th>
+                            <th>Length</th>
+                            <th>Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.trackInfo)
+                        {
+                            <tr>
+                                <td>
+                                    @* code to demo a button on a table 
+                                        using a icon
+                                    *@
+                                </td>
+                                <td>@item.SongName</td>
+                                <td>@item.AlbumTitle</td>
+                                <td>@item.ArtistName</td>
+                                <td>@TimeSpan.FromMilliseconds(item.Milliseconds).ToString(@"mm\:ss")</td>
+                                <td>@item.Price</td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="6">
+                                @{
+                                    foreach (var pageRef in Model.Pager)
+                                    {
+                                        // I can use the == because of PageRef type being a C# 9 record type
+                                        if (pageRef == Model.Pager.CurrentPage)
+                                        {
+                                            <b>@pageRef.Text</b>
+                                        }
+                                        else
+                                        {
+                                            <a title="Page @pageRef.Page" asp-page="/SamplePages/PlaylistManagement"
+                                            asp-route-currentpage="@pageRef.Page">@pageRef.Text</a>
+                                        }
+                                    }
+                                }
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            }
+        }
+    </div>
+    <div class="onehalf">
+       <form method="post" id="playlist">
+
+            <label>
+                Enter playlist name:
+                <input type="text" asp-for="playlistname" />
+            </label>
+            <br />
+            <button tye="submit" title="Retreive Playlist"
+                    asp-page-handler="Fetch">
+                Fetch List
+            </button>&nbsp;&nbsp;
+            @if(Model.qplaylistInfo != null &&
+                Model.qplaylistInfo.Count > 0)
+                {
+                    <button tye="submit" title="Remove tracks"
+                            asp-page-handler="Remove"
+                            style="background-color:var(--danger-color)">
+                        Remove Tracks
+                    </button>
+                }
+                &nbsp;&nbsp;
+             @if(Model.qplaylistInfo != null &&
+                Model.qplaylistInfo.Count > 0)
+                {
+                    <button tye="submit" title="Reorganize playlist"
+                            asp-page-handler="ReOrg">
+                        Re-Org Tracks
+                    </button>
+                }
+            <br /><br />
+            @if (Model.qplaylistInfo != null)
+            {
+                if (Model.qplaylistInfo.Count == 0)
+                {
+                    <p style="color:blue; font-weight:bold;">This playlist is empty or does not exist. Adding a track will create the playlist.</p>
+
+                }
+                else
+                {
+                    <table>
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>Trk #</th>
+                                <th>Song</th>
+                                <th>length</th>
+                                <th>Reorg Trk#</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                           @* code to demo CQRS for a table display*@
+                        </tbody>
+                    </table>
+                }
+
+            }
+        </form>
+    </div>
+</section>
