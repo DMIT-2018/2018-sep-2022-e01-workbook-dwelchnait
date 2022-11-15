@@ -84,6 +84,14 @@
                                     @* code to demo a button on a table 
                                         using a icon
                                     *@
+                                    <form method="post">
+                                        <input type="hidden" value="@item.TrackId"
+                                            asp-for="addtrackid">
+                                        <button type="submit" title="Add this Track"
+                                            asp-page-handler="AddTrack">
+                                         <i class="las la-plus"></i>
+                                        </button>
+                                    </form>
                                 </td>
                                 <td>@item.SongName</td>
                                 <td>@item.AlbumTitle</td>

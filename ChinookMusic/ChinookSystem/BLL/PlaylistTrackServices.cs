@@ -54,7 +54,7 @@ namespace ChinookSystem.BLL
 
         #region Command TRX methods
 
-        void PlaylistTrack_AddTrack(string playlistname, string username, int trackid)
+        public void PlaylistTrack_AddTrack(string playlistname, string username, int trackid)
         {
             //locals
             Track trackexists = null;
