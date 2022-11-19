@@ -68,8 +68,9 @@ namespace WebApp.Pages.SamplePages
 
         //this property will be tied to the INPUT fields of the web page
         //this list is tied to the table data elements for the playlist
+        //the =new() is REQUIRED to assist in retaining values during error handling
         [BindProperty]
-        public List<PlaylistTrackTRX> cplaylistInfo { get; set; }
+        public List<PlaylistTrackTRX> cplaylistInfo { get; set; } = new();
 
         //this property is tied to the form input element located on each
         //  of the rows of the track table
@@ -230,6 +231,24 @@ namespace WebApp.Pages.SamplePages
             try
             {
                //Add the code to process the list of tracks via the service.
+               if (string.IsNullOrWhiteSpace(playlistname))
+                {
+                    throw new Exception("You need to have a playlist selected first. Enter a playlist name and press Fetch.");
+                }
+               int oneselection = cplaylistInfo
+                                    .Where(x => x.SelectedTrack)
+                                    .Count();
+                if (oneselection == 0)
+                {
+                    throw new Exception("You first need to select at least one track to delete before pressing Remove.");
+                }
+
+                string username = USERNAME;
+                //send data to the service
+                _playlisttrackServices.PlaylistTrack_RemoveTracks(playlistname, username, cplaylistInfo);
+
+                //success
+                FeedBackMessage = "Tracks have been removed.";
 
                 return RedirectToPage(new
                 {
@@ -263,6 +282,54 @@ namespace WebApp.Pages.SamplePages
 
         }
 
+        public IActionResult OnPostReOrg()
+        {
+            try
+            {
+                //Add the code to process the list of tracks via the service.
+                if (string.IsNullOrWhiteSpace(playlistname))
+                {
+                    throw new Exception("You need to have a playlist selected first. Enter a playlist name and press Fetch.");
+                }
+                
+                string username = USERNAME;
+                //send data to the service
+                _playlisttrackServices.PlaylistTrack_MoveTracks(playlistname, username, cplaylistInfo);
+
+                //success
+                FeedBackMessage = "Tracks have been reorganized.";
+
+                return RedirectToPage(new
+                {
+                    searchBy = string.IsNullOrWhiteSpace(searchBy) ? " " : searchBy.Trim(),
+                    searchArg = string.IsNullOrWhiteSpace(searchArg) ? " " : searchArg.Trim(),
+                    playlistname = playlistname
+                });
+            }
+            catch (AggregateException ex)
+            {
+
+                ErrorMessage = "Unable to process reorganize tracks";
+                foreach (var error in ex.InnerExceptions)
+                {
+                    ErrorDetails.Add(error.Message);
+
+                }
+                GetTrackInfo();
+                GetPlaylist();
+
+                return Page();
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = GetInnerException(ex).Message;
+                GetTrackInfo();
+                GetPlaylist();
+
+                return Page();
+            }
+
+        }
         private Exception GetInnerException(Exception ex)
         {
             while(ex.InnerException != null)

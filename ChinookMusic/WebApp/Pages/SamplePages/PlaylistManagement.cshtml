@@ -110,11 +110,11 @@
                                         // I can use the == because of PageRef type being a C# 9 record type
                                         if (pageRef == Model.Pager.CurrentPage)
                                         {
-                                            <b>@pageRef.Text</b>
+                                                <b>@pageRef.Text</b>
                                         }
                                         else
                                         {
-                                            <a title="Page @pageRef.Page" asp-page="/SamplePages/PlaylistManagement"
+                                                <a title="Page @pageRef.Page" asp-page="/SamplePages/PlaylistManagement"
                                             asp-route-currentpage="@pageRef.Page">@pageRef.Text</a>
                                         }
                                     }
@@ -204,14 +204,32 @@
                            *@
                            @foreach(var item in Model.qplaylistInfo)
                            {
-                               <tr>
+                                @*
+                                   retain entered values non-query model fields (from the command collection)
+                                     to assist with error messges
+                                   setup local variables to hold the command data values
+                                   move any existing command collection data into the appropriate values
+                                   NOTE: WARNING. you MUST have an instance of your command collection (List<>)
+                                         to solve this, add a = new() to the declaration of your command
+                                            collection.
+                                          this will ensure a command data collection instance exsists even if empty
+                               *@
+                                bool selectedtrack = false;
+                                string? trackinput = null;
+                                var song = Model.cplaylistInfo.SingleOrDefault(x => x.TrackId == item.TrackId);
+                                if (song !=null)
+                                {
+                                    selectedtrack = song.SelectedTrack;
+                                    trackinput = song.TrackInput.ToString();
+                                }
+                                <tr>
                                    <td>
                                         <input type="hidden" name="cplaylistinfo.Index"
                                                         value="@item.TrackId">
                                         <input type="hidden"
                                             name="cplaylistinfo[@item.TrackId].TrackId"
                                             value="@item.TrackId">
-                                        <input type="checkbox" 
+                                        <input type="checkbox" checked="@selectedtrack"
                                              name="cplaylistinfo[@item.TrackId].SelectedTrack"
                                              value="true">
                                    </td>
@@ -227,10 +245,12 @@
                                    <td>
                                        @TimeSpan.FromMilliseconds(item.Milliseconds).ToString(@"mm\:ss")
                                    </td>
-                                   <input type="text"
-                                        name="cplaylistinfo[@item.TrackId].TrackInput">
-                                        
-                               </tr>
+                                   <td>
+                                        <input type="text" class="smallbox"
+                                            name="cplaylistinfo[@item.TrackId].TrackInput"
+                                            value="@trackinput">
+                                    </td>
+                                </tr>
                            }
                         </tbody>
                     </table>
