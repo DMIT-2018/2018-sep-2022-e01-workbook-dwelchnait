@@ -1,0 +1,151 @@
+﻿@page
+@model WebApp.Pages.ListtoListModel
+@{
+}
+@section CustomCSS{ 
+    <partial name="_MyCustomCSS" />
+}
+<h1> On Page List to List</h1>
+<form method="post">
+    <div class="setflex">
+        <section class="lefthalfpage">
+            <table>
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Name</th>
+                        <th>Hex</th>
+                        <th>RGB</th>
+                        <th>Warmth</th>
+                        <th>Avail</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.AvailableColors)
+                    {
+                        <tr>
+                            <td>
+                                <input type="hidden" name="AvailableColors.Index" value="@item.Name" />
+                                @* name and value are used instead of asp-for
+                                    these are used here because we are going to a list of item
+                                       and we need to index the individual instances in some fashion*@
+                                <button type="submit" name="SelectedColor" value="@item.Name"
+                                        asp-page-handler="AddItem">
+                                    Add
+                                </button>
+                            </td>
+                            <td>
+                                @* tie value to incoming data index (see button above)
+                                    The item.Name is the field of interest*@
+                                <input type="hidden" name="AvailableColors[@item.Name].Name" value="@item.Name" />
+                                <span style="display:inline-block; width: 16px; height: 16px; background-color:@item.HexCode"></span>
+                                @item.Name
+                            </td>
+                            <td>
+                                @* tie value to incoming data index (see button above) *@
+                                <input type="hidden" name="AvailableColors[@item.Name].HexCode" value="@item.HexCode" />
+                                @item.HexCode
+                            </td>
+                            <td>
+                                @* tie value to incoming data index (see button above) *@
+                                <input type="hidden" name="AvailableColors[@item.Name].RgbCode" value="@item.RgbCode" />
+                                @item.RgbCode
+                            </td>
+                            <td>
+                                <input type="hidden" name="AvailableColors[@item.Name].ColorType" value="@item.ColorType" />
+                                <select disabled>
+                                    @foreach (var itemwarmth in Model.Warmth)
+                                    {
+                                        <option value="@itemwarmth.ValueId"
+                                                selected="@(itemwarmth.ValueId == item.ColorType)">
+                                            @itemwarmth.DisplayText
+                                        </option>
+                                    }
+                                </select>
+                            </td>
+                            <td>
+                                @* checkboxes should have a value=true when bound to a boolean variable
+                                    when the name/value pair is set, IF check will be true. If NOT check
+                                    then the name/value pair is not sent and the default of a boolean
+                                    variable is false*@
+                                <input type="checkbox" name="AvailableColors[@item.Name].Available" checked="@item.Available"
+                                        value="true" />
+                                
+
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </section>
+        <section class="righthalfpage">
+            <table>
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Name</th>
+                        <th>Hex</th>
+                        <th>RGB</th>
+                        <th>Warmth</th>
+                        <th>Avail</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.ColorPallete)
+                    {
+                        <tr>
+                            <td>
+                                <input type="hidden" name="ColorPallete.Index" value="@item.Name" />
+                                @* name and value are used instead of asp-for
+                                    these are used here because we are going to a list of item
+                                       and we need to index the individual instances in some fashion
+                                    
+                                    if required you could add an onclick="return confirm('....')"
+                                    to the button*@
+                                <button type="submit" name="SelectedColor" value="@item.Name"
+                                        asp-page-handler="RemoveItem" class="danger">
+                                    Remove
+                                </button>
+                            </td>
+                            <td>
+                                @* tie value to incoming data index (see button above)
+                                    The item.Name is the field of interest*@
+                                <input type="hidden" name="ColorPallete[@item.Name].Name" value="@item.Name" />
+                                <span style="display:inline-block; width: 16px; height: 16px; background-color:@item.HexCode"></span>
+                                @item.Name
+                            </td>
+                            <td>
+                                @* tie value to incoming data index (see button above) *@
+                                <input type="hidden" name="ColorPallete[@item.Name].HexCode" value="@item.HexCode" />
+                                @item.HexCode
+                            </td>
+                            <td>
+                                @* tie value to incoming data index (see button above) *@
+                                <input type="hidden" name="ColorPallete[@item.Name].RgbCode" value="@item.RgbCode" />
+                                @item.RgbCode
+                            </td>
+                            <td>
+                                <input type="hidden" name="ColorPallete[@item.Name].ColorType" value="@item.ColorType" />
+                                <select disabled>
+                                    @foreach (var itemwarmth in Model.Warmth)
+                                    {
+                                        <option value="@itemwarmth.ValueId"
+                                                selected="@(itemwarmth.ValueId == item.ColorType)">
+                                            @itemwarmth.DisplayText
+                                        </option>
+                                    }
+                                </select>
+                            </td>
+                            <td>
+                                <input type="checkbox" name="ColorPallete[@item.Name].Available" 
+                                       checked="@item.Available" value="true" />
+                                
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+        </section>
+    </div>
+</form>
