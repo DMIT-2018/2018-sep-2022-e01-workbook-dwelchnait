@@ -66,10 +66,16 @@
                 &nbsp;Dinner<br/>
             <input type="radio" value="snacks" asp-for="Meal" />
                 &nbsp;Snacks<br/>*@
+                <div class="setflex">
             @foreach(var item in Model.Meals)
             {
-                <input type="radio" value="@item" asp-for="Meal" /> @item<br/>
+                    <input type="radio" value="@item" asp-for="Meal" />
+                   @:&nbsp;
+                    @item
+                    @:&nbsp;&nbsp;
+                   @* <br />*@
             }
+            </div>
             <label>
                 <input type="checkbox" value=true asp-for="AcceptanceBox" />
                  &nbsp; I agree to terms
